@@ -21,13 +21,15 @@ public class EchoServer {
                 // Wait for the next client connection
                 Socket socketServe = serverSocket.accept();
 
+                // Setup Input and Output Streams
                 InputStream inFromClient = socketServe.getInputStream();
                 OutputStream outToClient = socketServe.getOutputStream();
 
                 // Create a new thread to handle the client
                 inFromClient.transferTo(outToClient);
 
-                // Close the socket
+                // Close the socket, breaking the connection to the client, and
+                // closing the input and output streams
                 inFromClient.close();
                 outToClient.flush();
                 outToClient.close();
