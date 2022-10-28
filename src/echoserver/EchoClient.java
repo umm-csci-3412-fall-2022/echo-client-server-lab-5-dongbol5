@@ -5,27 +5,49 @@ import java.net.*;
 
 public class EchoClient {
 
+    // The port number we are connecting to
+    public static final int PORT_NUMBER = 6013;
     public static void main(String[] args) {
 
-        String serverName = args[0];
-        int port = Integer.parseInt(args[1]);
+        String server;
 
-        try {
-            System.out.println("Connecting to " + serverName + " on port " + port);
-            Socket client = new Socket(serverName, port);
-            System.out.println("Just connected to " + client.getRemoteSocketAddress());
-            OutputStream outToServer = client.getOutputStream();
-            DataOutputStream out = new DataOutputStream(outToServer);
-
-            out.writeUTF("Hello from " + client.getLocalSocketAddress());
-            InputStream inFromServer = client.getInputStream();
-            DataInputStream in = new DataInputStream(inFromServer);
-            System.out.println("Server says " + in.readUTF());
-            client.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // If no server is specified on the command line, use the local host
+        if (args.length == 0) {
+            server = "localhost";
+        } else {
+            server = args[0];
         }
-    
+
+        // Try to open a socket on the specified server and port
+        try {
+
+          // Connect to the server
+          Socket socketServe = new Socket(server, PORT_NUMBER);
+
+          // Setup Input and Output Streams
+          InputStream inFromServer = socketServe.getInputStream();
+          OutputStream outToServer = socketServe.getOutputStream();
+
+          // Read from the keyboard and send to the server
+          int inputByte;
+          while ((inputByte = System.in.read()) != -1) {
+            outToServer.write(inputByte);
+          }
+
+          // Close the socket
+          outToServer.flush();
+          socketServe.close();
+          System.out.println(inFromServer.readAllBytes());
+
+          // Provide some basic error handling
+        } catch (ConnectException ce) {
+            System.out.println("Unable connect to: " + server);
+            System.out.println("Please check your server, and try again.");
+        } catch (IOException ioe) {
+            System.out.println("An unexpected exception happened. Please refer to the following error message and try again:");
+            System.err.println(ioe);
+        }
+
     }
 
 }
