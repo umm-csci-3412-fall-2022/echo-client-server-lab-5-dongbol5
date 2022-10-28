@@ -32,12 +32,13 @@ public class EchoClient {
           int inputByte;
           while ((inputByte = System.in.read()) != -1) {
             outToServer.write(inputByte);
+            System.out.write(inFromServer.read());
           }
 
           // Close the socket
           outToServer.flush();
-          socketServe.close();
-          System.out.println(inFromServer.readAllBytes());
+          socketServe.shutdownOutput();
+          System.out.write(inFromServer.readAllBytes());
 
           // Provide some basic error handling
         } catch (ConnectException ce) {
