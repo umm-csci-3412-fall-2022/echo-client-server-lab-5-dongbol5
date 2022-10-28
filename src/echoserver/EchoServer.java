@@ -3,44 +3,44 @@ package echoserver;
 import java.io.*;
 import java.net.*;
 
-public class EchoServer extends Thread {
+public class EchoServer {
 
-    private ServerSocket serverSocket;
+    // The port number we are listening on
+    public static final int PORT_NUMBER = 6013;
 
-    public EchoServer(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        serverSocket.setSoTimeout(10000);
-    }
+    public static void main (String[] args) {
 
-    public void run() {
-        while (true) {
-            try {
-                System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
-                Socket server = serverSocket.accept();
-                System.out.println("Just connected to " + server.getRemoteSocketAddress());
-                DataInputStream in = new DataInputStream(server.getInputStream());
-                System.out.println(in.readUTF());
-                DataOutputStream out = new DataOutputStream(server.getOutputStream());
-                out.writeUTF("Thank you for connecting to " + server.getLocalSocketAddress() + "\nGoodbye!");
-                server.close();
-            } catch (SocketTimeoutException s) {
-                System.out.println("Socket timed out!");
-                break;
-            } catch (IOException e) {
-                e.printStackTrace();
-                break;
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        int port = Integer.parseInt(args[0]);
         try {
-            Thread t = new EchoServer(port);
-            t.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}
 
+            // Start listening on the specified port
+            ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
+
+            // Run forever, which is common for server style services
+            while (true) {
+
+                // Wait for the next client connection
+                Socket socketServe = serverSocket.accept();
+
+                InputStream inFromClient = socketServe.getInputStream();
+                OutputStream outToClient = socketServe.getOutputStream();
+
+                // Create a new thread to handle the client
+                inFromClient.transferTo(outToClient);
+
+                // Close the socket
+                inFromClient.close();
+                outToClient.flush();
+                outToClient.close();
+                socketServe.close();
+
+            }
+
+        // Provide some basic error handling
+        } catch (IOException ioe) {
+            System.out.println("An unexpected exception happened. Please refer to the following error message and try again:");
+            System.err.println(ioe);
+        }
+
+    }
+
+}
